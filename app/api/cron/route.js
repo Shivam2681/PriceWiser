@@ -10,7 +10,7 @@ export const maxDuration = 300; // This function can run for a maximum of 300 se
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export async function GET(request, Request) {
+export async function GET(request) {
   try {
     connectToDB();
 
@@ -62,7 +62,7 @@ export async function GET(request, Request) {
           };
           // Construct emailContent
           const emailContent = await generateEmailBody(productInfo, emailNotifType);
-          // Get array of user emails
+          // Get an array of user emails
           const userEmails = updatedProduct.users.map((user) => user.email);
           // Send email notification
           await sendEmail(emailContent, userEmails);
