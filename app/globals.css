@@ -150,3 +150,19 @@
     @apply bg-gray-900 border border-gray-900 rounded-lg shadow-xs px-5 py-3 text-white text-base font-semibold hover:opacity-90 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-40;
   }
 }
+
+@media (max-width: 1104px) {
+  .hero-carousel{
+    padding-top: 7.25rem;
+  }
+}
+@media (max-width: 991px) {
+  .hero-carousel{
+    padding-top: 7.25rem;
+  }
+}
+@media (max-width: 947px){
+  .hero-carousel{
+    padding-top: 7.25rem;
+  }
+}
