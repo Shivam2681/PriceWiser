@@ -1,8 +1,15 @@
 import Modal from "@/components/Modal";
 import PriceInfoCard from "@/components/PriceInfoCard";
 import ProductCard from "@/components/ProductCard";
+import PriceHistoryChart from "@/components/PriceHistoryChart";
+import DeleteProductButton from "@/components/DeleteProductButton";
+import FavoriteButton from "@/components/FavoriteButton";
+import TrackButton from "@/components/TrackButton";
 import { getProductById, getSimilarProducts } from "@/lib/actions"
+import { isUserTrackingProduct } from "@/lib/actions/user";
 import { formatNumber } from "@/lib/utils";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -12,25 +19,37 @@ async function ProductDetails({ params: { id } }) {
 
   if (!product) redirect('/');
 
+  const session = await getServerSession(authOptions);
+  const isTracking = session?.user?.id 
+    ? await isUserTrackingProduct(session.user.id, id)
+    : false;
+
   const similarProducts = await getSimilarProducts(id);
+  
+  // Convert price history to plain objects for client component
+  const plainPriceHistory = product.priceHistory?.map(item => ({
+    price: item.price,
+    date: item.date?.toISOString ? item.date.toISOString() : item.date,
+  })) || [];
 
   return (
     <div className="product-container">
-      <div className="flex gap-28 xl:flex-row flex-col">
-        <div className="product-image">
+      <div className="flex flex-col xl:flex-row gap-8 sm:gap-12 lg:gap-16 xl:gap-28">
+        <div className="product-image w-full xl:w-1/2">
           <Image 
             src={product.image}
             alt={product.title}
             width={580}
             height={400}
-            className="mx-auto"
+            className="mx-auto max-w-full h-auto"
+            priority
           />
         </div>
 
-        <div className="flex-1 flex flex-col">
-          <div className="flex justify-between items-start gap-5 flex-wrap pb-6">
-            <div className="flex flex-col gap-3">
-              <p className="text-[28px] text-secondary font-semibold">
+        <div className="flex-1 flex flex-col w-full xl:w-1/2">
+          <div className="flex flex-col sm:flex-row justify-between items-start gap-4 sm:gap-5 flex-wrap pb-4 sm:pb-6">
+            <div className="flex flex-col gap-2 sm:gap-3 flex-1">
+              <p className="text-lg sm:text-xl lg:text-[28px] text-secondary font-semibold leading-tight">
                 {product.title}
               </p>
 
@@ -44,27 +63,10 @@ async function ProductDetails({ params: { id } }) {
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="product-hearts">
-                <Image 
-                  src="/assets/icons/red-heart.svg"
-                  alt="heart"
-                  width={20}
-                  height={20}
-                />
-
-                <p className="text-base font-semibold text-[#D46F77]">
-                  {product.reviewsCount}
-                </p>
-              </div>
-
-              <div className="p-2 bg-white-200 rounded-10">
-                <Image 
-                  src="/assets/icons/bookmark.svg"
-                  alt="bookmark"
-                  width={20}
-                  height={20}
-                />
-              </div>
+              <FavoriteButton 
+                productId={id}
+                initialFavorited={false}
+              />
 
               <div className="p-2 bg-white-200 rounded-10">
                 <Image 
@@ -78,11 +80,11 @@ async function ProductDetails({ params: { id } }) {
           </div>
 
           <div className="product-info">
-            <div className="flex flex-col gap-2">
-              <p className="text-[34px] text-secondary font-bold">
+            <div className="flex flex-col gap-1 sm:gap-2">
+              <p className="text-2xl sm:text-3xl lg:text-[34px] text-secondary font-bold">
                 {product.currency} {formatNumber(product.currentPrice)}
               </p>
-              <p className="text-[21px] text-black opacity-50 line-through">
+              <p className="text-lg sm:text-xl lg:text-[21px] text-black opacity-50 line-through">
                 {product.currency} {formatNumber(product.originalPrice)}
               </p>
             </div>
@@ -121,8 +123,8 @@ async function ProductDetails({ params: { id } }) {
             </div>
           </div>
 
-          <div className="my-7 flex flex-col gap-5">
-            <div className="flex gap-5 flex-wrap">
+          <div className="my-4 sm:my-7 flex flex-col gap-3 sm:gap-5">
+            <div className="flex gap-3 sm:gap-5 flex-wrap">
               <PriceInfoCard 
                 title="Current Price"
                 iconSrc="/assets/icons/price-tag.svg"
@@ -146,11 +148,29 @@ async function ProductDetails({ params: { id } }) {
             </div>
           </div>
 
-          <Modal productId={id} />
+          <div className="flex flex-wrap gap-2 sm:gap-3 mt-4">
+            <TrackButton 
+              productId={id} 
+              isTracking={isTracking}
+              userEmail={session?.user?.email}
+            />
+            {session?.user?.isAdmin && (
+              <DeleteProductButton productId={id} />
+            )}
+          </div>
         </div>
       </div>
 
-      <div className="flex flex-col gap-16">
+      {/* Price History Chart */}
+      <div className="mt-10">
+        <PriceHistoryChart 
+          priceHistory={plainPriceHistory} 
+          currency={product.currency}
+          originalPrice={product.originalPrice}
+        />
+      </div>
+
+      <div className="flex flex-col gap-16 mt-10">
         {/* <div className="flex flex-col gap-5">
           <h3 className="text-2xl text-secondary font-semibold">
             Product Description
@@ -161,25 +181,27 @@ async function ProductDetails({ params: { id } }) {
           </div>
         </div> */}
 
-        <button className="btn w-fit mx-auto flex items-center justify-center gap-3 min-w-[200px]">
+        <a 
+          href={product.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn w-fit mx-auto flex items-center justify-center gap-3 min-w-[200px]"
+        >
           <Image 
             src="/assets/icons/bag.svg"
-            alt="check"
+            alt="buy"
             width={22}
             height={22}
           />
-
-          <Link href="/" className="text-base text-white">
-            Buy Now
-          </Link>
-        </button>
+          <span className="text-base text-white">Buy Now</span>
+        </a>
       </div>
 
       {similarProducts && similarProducts?.length > 0 && (
-        <div className="py-14 flex flex-col gap-2 w-full">
+        <div className="py-8 sm:py-14 flex flex-col gap-2 w-full">
           <p className="section-text">Similar Products</p>
 
-          <div className="flex flex-wrap gap-10 mt-7 w-full">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 lg:gap-6 mt-4 sm:mt-7 w-full">
             {similarProducts.map((product) => (
               <ProductCard key={product._id} product={product} />
             ))}

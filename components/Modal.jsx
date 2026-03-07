@@ -1,30 +1,59 @@
 "use client"
 
-import {Fragment, useState } from 'react'
+import { Fragment, useState } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import Image from 'next/image'
 import { addUserEmailToProduct } from '@/lib/actions'
+import { useSession } from 'next-auth/react'
+import toast from 'react-hot-toast'
+import AuthModal from './AuthModal'
 
 
-const Modal = ({ productId }) => {
-  let [isOpen, setIsOpen] = useState(true)
+const Modal = ({ productId, isOpen: controlledIsOpen, onSuccess, onClose }) => {
+  let [isOpen, setIsOpen] = useState(false)
+  const [showAuthModal, setShowAuthModal] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [email, setEmail] = useState('');
+  const { data: session } = useSession();
+  
+  // Use controlled state if provided
+  const isModalOpen = controlledIsOpen !== undefined ? controlledIsOpen : isOpen;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    await addUserEmailToProduct(productId, email);
-
-    setIsSubmitting(false)
-    setEmail('')
-    closeModal()
+    try {
+      await addUserEmailToProduct(productId, email, session?.user?.id);
+      toast.success('You will receive price alerts at ' + email);
+      setEmail('');
+      closeModal();
+      onSuccess?.();
+    } catch (error) {
+      console.error('Failed to set up email tracking:', error);
+      toast.error('Failed to set up tracking. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
-  const openModal = () => setIsOpen(true);
+  const openModal = () => {
+    if (!session?.user) {
+      setShowAuthModal(true);
+    } else {
+      setIsOpen(true);
+    }
+  };
 
-  const closeModal = () => setIsOpen(false);
+  const closeModal = () => {
+    setIsOpen(false);
+    onClose?.();
+  };
+
+  const handleAuthSuccess = () => {
+    setShowAuthModal(false);
+    setIsOpen(true);
+  };
 
   return (
     <>
@@ -32,7 +61,13 @@ const Modal = ({ productId }) => {
         Track
       </button>
 
-      <Transition appear show={isOpen} as={Fragment}>
+      <AuthModal 
+        isOpen={showAuthModal} 
+        setIsOpen={setShowAuthModal}
+        onSuccess={handleAuthSuccess}
+      />
+
+      <Transition appear show={isModalOpen} as={Fragment}>
         <Dialog as="div" onClose={closeModal} className="dialog-container">
           <div className="min-h-screen px-4 text-center">
             <Transition.Child
@@ -109,6 +144,7 @@ const Modal = ({ productId }) => {
                       type="email"
                       id="email"
                       value={email}
+                      defaultValue={session?.user?.email || ''}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="Enter your email address"
                       className='dialog-input'
