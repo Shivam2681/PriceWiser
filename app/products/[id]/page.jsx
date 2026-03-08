@@ -153,6 +153,8 @@ async function ProductDetails({ params: { id } }) {
               productId={id} 
               isTracking={isTracking}
               userEmail={session?.user?.email}
+              productTitle={product.title}
+              productImage={product.image}
             />
             {session?.user?.isAdmin && (
               <DeleteProductButton productId={id} />

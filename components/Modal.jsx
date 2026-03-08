@@ -57,9 +57,12 @@ const Modal = ({ productId, isOpen: controlledIsOpen, onSuccess, onClose }) => {
 
   return (
     <>
-      <button type="button" className="btn" onClick={openModal}>
-        Track
-      </button>
+      {/* Only show the trigger button if not controlled externally */}
+      {controlledIsOpen === undefined && (
+        <button type="button" className="btn" onClick={openModal}>
+          Track
+        </button>
+      )}
 
       <AuthModal 
         isOpen={showAuthModal} 

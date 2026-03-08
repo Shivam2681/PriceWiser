@@ -30,6 +30,7 @@ export async function GET(request) {
           ...currentProduct.priceHistory,
           {
             price: scrapedProduct.currentPrice,
+            date: new Date(),
           },
         ];
 
@@ -66,6 +67,9 @@ export async function GET(request) {
           const userEmails = updatedProduct.users.map((user) => user.email);
           // Send email notification
           await sendEmail(emailContent, userEmails);
+          console.log(`  ✓ Email sent successfully!`);
+        } else {
+          console.log(`  ✗ No email sent (conditions not met or no users)`);
         }
 
         return updatedProduct;

@@ -112,7 +112,11 @@ export default async function MyProductsPage() {
                   >
                     View Details
                   </Link>
-                  <UntrackButton productId={product._id.toString()} />
+                  <UntrackButton 
+                    productId={product._id.toString()} 
+                    productTitle={product.title}
+                    productImage={product.image}
+                  />
                 </div>
               </div>
             </div>
