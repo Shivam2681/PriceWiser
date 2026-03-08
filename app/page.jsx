@@ -44,12 +44,12 @@ const Home = async () => {
       <section className="trending-section">
         <div className="flex justify-between items-center mb-8">
           <h2 className="section-text">Trending Products</h2>
-          <Link 
+          {/* <Link 
             href="/products" 
             className="text-primary font-semibold hover:underline"
           >
             View All
-          </Link>
+          </Link> */}
         </div>
 
         {allProducts && allProducts.length > 0 ? (

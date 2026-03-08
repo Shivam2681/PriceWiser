@@ -68,9 +68,9 @@
   .product-image {
     @apply flex-grow xl:max-w-[50%] max-w-full py-4 sm:py-6 lg:py-8 px-4 sm:px-6 lg:px-8 border border-[#CDDBFF] rounded-[17px] flex items-center justify-center xl:max-h-[750px];
   }
-  
+
   .product-image img {
-    @apply max-h-[350px] sm:max-h-[450px] md:max-h-[520px] lg:max-h-[600px] xl:max-h-[650px] 2xl:max-h-[700px] w-auto object-contain;
+    @apply max-h-[420px] sm:max-h-[520px] md:max-h-[600px] lg:max-h-[680px] xl:max-h-[730px] 2xl:max-h-[780px] w-full object-contain;
   }
 
   .product-info {
@@ -95,7 +95,7 @@
   }
 
   .dialog-content {
-    @apply p-6  bg-white inline-block w-full max-w-md my-8 overflow-hidden text-left align-middle transition-all transform  shadow-xl rounded-2xl;
+    @apply p-6 bg-white inline-block w-full max-w-md my-8 overflow-hidden text-left align-middle transition-all transform shadow-xl rounded-2xl;
   }
 
   .dialog-head_text {
@@ -156,17 +156,19 @@
 }
 
 @media (max-width: 1104px) {
-  .hero-carousel{
+  .hero-carousel {
     padding-top: 7.25rem;
   }
 }
+
 @media (max-width: 991px) {
-  .hero-carousel{
+  .hero-carousel {
     padding-top: 7.25rem;
   }
 }
-@media (max-width: 947px){
-  .hero-carousel{
+
+@media (max-width: 947px) {
+  .hero-carousel {
     padding-top: 7.25rem;
   }
 }
