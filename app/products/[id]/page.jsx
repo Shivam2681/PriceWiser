@@ -41,7 +41,7 @@ async function ProductDetails({ params: { id } }) {
             alt={product.title}
             width={580}
             height={400}
-            className="mx-auto max-w-full h-auto"
+            className="mx-auto"
             priority
           />
         </div>

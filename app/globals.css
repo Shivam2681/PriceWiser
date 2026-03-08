@@ -37,11 +37,11 @@
   }
 
   .hero-carousel {
-    @apply relative sm:px-10 py-5 sm:pt-20 pb-5 max-w-[560px] h-[700px] w-full bg-[#F2F4F7] rounded-[30px] sm:mx-auto;
+    @apply relative px-4 sm:px-10 py-5 sm:pt-20 pb-5 max-w-[560px] h-auto min-h-[250px] sm:min-h-[350px] md:min-h-[420px] lg:min-h-[540px] w-full bg-[#F2F4F7] rounded-[30px] sm:mx-auto;
   }
 
   .carousel {
-    @apply flex flex-col-reverse h-[700px];
+    @apply flex flex-col-reverse h-auto;
   }
 
   .carousel .control-dots {
@@ -66,7 +66,11 @@
   }
 
   .product-image {
-    @apply flex-grow xl:max-w-[50%] max-w-full py-8 sm:py-12 lg:py-16 border border-[#CDDBFF] rounded-[17px];
+    @apply flex-grow xl:max-w-[50%] max-w-full py-4 sm:py-6 lg:py-8 px-4 sm:px-6 lg:px-8 border border-[#CDDBFF] rounded-[17px] flex items-center justify-center xl:max-h-[750px];
+  }
+  
+  .product-image img {
+    @apply max-h-[350px] sm:max-h-[450px] md:max-h-[520px] lg:max-h-[600px] xl:max-h-[650px] 2xl:max-h-[700px] w-auto object-contain;
   }
 
   .product-info {
