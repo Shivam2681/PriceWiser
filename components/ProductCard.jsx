@@ -1,14 +1,40 @@
+"use client";
+
 import Image from 'next/image';
 import Link from 'next/link';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import FavoriteButton from './FavoriteButton';
+import { refreshProductPrice } from '@/lib/actions/product';
 
 const ProductCard = ({ product }) => {
+  const router = useRouter();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const discount = product.discountRate || 
     Math.round(((product.originalPrice - product.currentPrice) / product.originalPrice) * 100);
   
   const isLowestPrice = product.currentPrice === product.lowestPrice;
   const isPendingData = product.currentPrice === 0;
+
+  const handleRefreshPrice = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (isRefreshing) return;
+    
+    setIsRefreshing(true);
+    try {
+      const result = await refreshProductPrice(product._id.toString());
+      if (result.success) {
+        router.refresh();
+      }
+    } catch (error) {
+      console.error('Failed to refresh price:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
   
   return (
     <div className="product-card group relative">
@@ -52,10 +78,34 @@ const ProductCard = ({ product }) => {
             </div>
           )}
           
-          {/* Pending Data Badge */}
+          {/* Pending Data Badge with Refresh Button */}
           {isPendingData && (
-            <div className="absolute top-2 right-2 bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded">
-              Price Pending
+            <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
+              <div className="bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded">
+                Price Pending
+              </div>
+              <button
+                onClick={handleRefreshPrice}
+                disabled={isRefreshing}
+                className="bg-blue-500 hover:bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded flex items-center gap-1 transition disabled:opacity-50"
+              >
+                {isRefreshing ? (
+                  <>
+                    <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Refreshing...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Refresh
+                  </>
+                )}
+              </button>
             </div>
           )}
         </div>
