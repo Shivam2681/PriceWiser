@@ -12,6 +12,9 @@ jobs:
     steps:
       - name: Trigger Price Check
         run: |
-          curl -X GET "${{ secrets.VERCEL_URL }}/api/cron" \
+          echo "Triggering cron at: ${{ secrets.VERCEL_URL }}/api/cron"
+          response=$(curl -s -w "\n%{http_code}" -X GET "${{ secrets.VERCEL_URL }}/api/cron" \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            -H "Content-Type: application/json"
+            -H "Content-Type: application/json")
+          echo "Response:"
+          echo "$response"
