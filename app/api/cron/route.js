@@ -12,6 +12,12 @@ export const revalidate = 0;
 
 export async function GET(request) {
   try {
+    // Verify cron secret to prevent unauthorized access
+    const authHeader = request.headers.get('authorization');
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     connectToDB();
 
     const products = await Product.find({});
