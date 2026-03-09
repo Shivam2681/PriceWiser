@@ -18,19 +18,36 @@ export async function GET(request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    connectToDB();
+    console.log('🚀 Cron job started at:', new Date().toISOString());
+
+    await connectToDB();
+    console.log('✅ Connected to database');
 
     const products = await Product.find({});
+    console.log(`📦 Found ${products.length} products in database`);
 
-    if (!products) throw new Error("No product fetched");
+    if (!products || products.length === 0) {
+      console.log('⚠️ No products found');
+      return NextResponse.json({ message: "No products found", data: [] });
+    }
 
     // ======================== 1 SCRAPE LATEST PRODUCT DETAILS & UPDATE DB
+    let emailsSent = 0;
+    let productsProcessed = 0;
+    
     const updatedProducts = await Promise.all(
       products.map(async (currentProduct) => {
+        console.log(`\n🔍 Processing: ${currentProduct.title}`);
+        
         // Scrape product
         const scrapedProduct = await scrapeAmazonProduct(currentProduct.url);
 
-        if (!scrapedProduct) return;
+        if (!scrapedProduct) {
+          console.log(`  ❌ Failed to scrape product`);
+          return;
+        }
+        
+        console.log(`  ✅ Scraped - Current price: ${scrapedProduct.currentPrice}, Users: ${currentProduct.users.length}`);
 
         const updatedPriceHistory = [
           ...currentProduct.priceHistory,
@@ -63,6 +80,7 @@ export async function GET(request) {
         );
 
         if (emailNotifType && updatedProduct.users.length > 0) {
+          console.log(`  📧 Email notification type: ${emailNotifType}`);
           const productInfo = {
             title: updatedProduct.title,
             url: updatedProduct.url,
@@ -71,20 +89,30 @@ export async function GET(request) {
           const emailContent = await generateEmailBody(productInfo, emailNotifType);
           // Get an array of user emails
           const userEmails = updatedProduct.users.map((user) => user.email);
+          console.log(`  📨 Sending email to ${userEmails.length} users:`, userEmails);
           // Send email notification
           await sendEmail(emailContent, userEmails);
+          emailsSent++;
           console.log(`  ✓ Email sent successfully!`);
         } else {
-          console.log(`  ✗ No email sent (conditions not met or no users)`);
+          console.log(`  ✗ No email sent (type: ${emailNotifType || 'none'}, users: ${updatedProduct.users.length})`);
         }
+        
+        productsProcessed++;
 
         return updatedProduct;
       })
     );
 
+    console.log(`\n📊 Cron job completed:`);
+    console.log(`   Products processed: ${productsProcessed}/${products.length}`);
+    console.log(`   Emails sent: ${emailsSent}`);
+
     return NextResponse.json({
       message: "Ok",
-      data: updatedProducts,
+      productsProcessed,
+      emailsSent,
+      totalProducts: products.length,
     });
   } catch (error) {
     throw new Error(`Failed to get all products: ${error.message}`);
