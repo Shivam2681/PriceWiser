@@ -29,7 +29,14 @@ export default async function RootLayout({ children }) {
         <style dangerouslySetInnerHTML={{__html: `
           #initial-loader {
             position: fixed;
-            inset: 0;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100vw;
+            height: 100vh;
+            width: 100dvw;
+            height: 100dvh;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             display: flex;
             flex-direction: column;
@@ -37,6 +44,7 @@ export default async function RootLayout({ children }) {
             justify-content: center;
             z-index: 9999;
             transition: opacity 0.5s ease, visibility 0.5s ease;
+            overflow: hidden;
           }
           #initial-loader.hidden {
             opacity: 0;
