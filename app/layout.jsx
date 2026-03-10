@@ -2,6 +2,7 @@ import Navbar from '@/components/Navbar'
 import ToastProvider from '@/components/ui/ToastProvider'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import Providers from '@/components/Providers'
+
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import './globals.css'
@@ -176,6 +177,7 @@ export default async function RootLayout({ children }) {
         
         <Providers session={session}>
           <ToastProvider />
+
           <main className="">
             <Navbar />
             <ErrorBoundary>

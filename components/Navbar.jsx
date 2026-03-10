@@ -57,7 +57,7 @@ const Navbar = () => {
           </Link>
 
           <div className="flex items-center gap-5">
-            <Link href="/" className="hidden sm:block p-2 hover:bg-gray-100 rounded-lg transition">
+            {/* <Link href="/" className="hidden sm:block p-2 hover:bg-gray-100 rounded-lg transition">
               <Image 
                 src="/assets/icons/search.svg"
                 alt="search"
@@ -65,7 +65,7 @@ const Navbar = () => {
                 height={24}
                 className="object-contain opacity-70"
               />
-            </Link>
+            </Link> */}
 
             {status === "loading" ? (
               <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
