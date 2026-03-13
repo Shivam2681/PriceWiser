@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ProductSearch from "./ProductSearch";
@@ -8,6 +8,10 @@ import ProductCard from "./ProductCard";
 
 export default function TrendingProducts({ products }) {
   const [filteredProducts, setFilteredProducts] = useState(products);
+
+  const handleFilter = useCallback((filtered) => {
+    setFilteredProducts(filtered);
+  }, []);
 
   return (
     <section className="trending-section">
@@ -19,7 +23,7 @@ export default function TrendingProducts({ products }) {
           <div className="w-full lg:w-auto lg:min-w-[300px]">
             <ProductSearch 
               products={products} 
-              onFilter={setFilteredProducts}
+              onFilter={handleFilter}
               placeholder="Search trending products..."
             />
           </div>

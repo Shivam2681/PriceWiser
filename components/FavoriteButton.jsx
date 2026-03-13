@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { addToFavorites, removeFromFavorites, isProductFavorited } from "@/lib/actions/user";
 import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
@@ -20,9 +20,9 @@ export default function FavoriteButton({ productId, initialFavorited = false }) 
     if (session?.user?.id) {
       isProductFavorited(session.user.id, productId).then(setIsFavorited);
     }
-  }, [session, productId]);
+  }, [session?.user?.id, productId]);
 
-  const handleToggle = async (e) => {
+  const handleToggle = useCallback(async (e) => {
     e.preventDefault();
     e.stopPropagation();
     
@@ -30,6 +30,8 @@ export default function FavoriteButton({ productId, initialFavorited = false }) 
       setShowAuthModal(true);
       return;
     }
+
+    if (isLoading) return;
 
     setIsLoading(true);
     try {
@@ -49,12 +51,12 @@ export default function FavoriteButton({ productId, initialFavorited = false }) 
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [session?.user?.id, productId, isFavorited, isLoading, router]);
 
   return (
     <>
       <button
-        onClick={(e) => handleToggle(e)}
+        onClick={handleToggle}
         disabled={isLoading}
         className={`p-2 rounded-lg transition ${
           isFavorited 

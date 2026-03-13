@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
 
-import { getLowestPrice, getHighestPrice, getAveragePrice, getEmailNotifType } from "@/lib/utils";
+import { getUpdatedPriceData, getEmailNotifType } from "@/lib/utils";
 import { connectToDB } from "@/lib/mongoose";
 import Product from "@/lib/models/product.models";
 import { scrapeAmazonProduct } from "@/lib/scraper";
 import { generateEmailBody, sendEmail } from "@/lib/nodemailer";
 
-export const maxDuration = 60; // This function can run for a maximum of 60 seconds
+// Helper function to add delay between scrapes
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+export const maxDuration = 300; // Increased to 5 minutes for safer processing
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
@@ -31,46 +34,47 @@ export async function GET(request) {
       return NextResponse.json({ message: "No products found", data: [] });
     }
 
-    // ======================== 1 SCRAPE LATEST PRODUCT DETAILS & UPDATE DB
+    // Process products sequentially with a small delay to avoid rate limiting
     let emailsSent = 0;
     let productsProcessed = 0;
+    const updatedProductsList = [];
     
-    const updatedProducts = await Promise.all(
-      products.map(async (currentProduct) => {
-        console.log(`\n🔍 Processing: ${currentProduct.title}`);
+    for (const currentProduct of products) {
+        console.log(`\n🔍 Processing (${productsProcessed + 1}/${products.length}): ${currentProduct.title}`);
         
+        // Add a small delay between scrapes (e.g., 2 seconds)
+        if (productsProcessed > 0) await delay(2000);
+
         // Scrape product
         const scrapedProduct = await scrapeAmazonProduct(currentProduct.url);
 
         if (!scrapedProduct) {
           console.log(`  ❌ Failed to scrape product`);
-          return;
+          productsProcessed++;
+          continue;
         }
         
         console.log(`  ✅ Scraped - Current price: ${scrapedProduct.currentPrice}, Users: ${currentProduct.users.length}`);
 
-        const updatedPriceHistory = [
-          ...currentProduct.priceHistory,
-          {
-            price: scrapedProduct.currentPrice,
-            date: new Date(),
-          },
-        ];
+        // Use shared utility for price history and stats
+        const { priceHistory, lowestPrice, highestPrice, averagePrice } = 
+          getUpdatedPriceData(currentProduct.priceHistory, scrapedProduct.currentPrice);
 
-        const product = {
+        const updatedData = {
           ...scrapedProduct,
-          priceHistory: updatedPriceHistory,
-          lowestPrice: getLowestPrice(updatedPriceHistory),
-          highestPrice: getHighestPrice(updatedPriceHistory),
-          averagePrice: getAveragePrice(updatedPriceHistory),
+          priceHistory,
+          lowestPrice,
+          highestPrice,
+          averagePrice,
         };
 
         // Update Products in DB
         const updatedProduct = await Product.findOneAndUpdate(
           {
-            url: product.url,
+            url: scrapedProduct.url,
           },
-          product
+          updatedData,
+          { new: true }
         );
 
         // ======================== 2 CHECK EACH PRODUCT'S STATUS & SEND EMAIL ACCORDINGLY
@@ -94,27 +98,21 @@ export async function GET(request) {
           await sendEmail(emailContent, userEmails);
           emailsSent++;
           console.log(`  ✓ Email sent successfully!`);
-        } else {
-          console.log(`  ✗ No email sent (type: ${emailNotifType || 'none'}, users: ${updatedProduct.users.length})`);
         }
         
+        updatedProductsList.push(updatedProduct);
         productsProcessed++;
+    }
 
-        return updatedProduct;
-      })
-    );
-
-    console.log(`\n📊 Cron job completed:`);
-    console.log(`   Products processed: ${productsProcessed}/${products.length}`);
-    console.log(`   Emails sent: ${emailsSent}`);
-
+    console.log(`\n✅ Cron job completed! Processed: ${productsProcessed}, Emails sent: ${emailsSent}`);
+    
     return NextResponse.json({
-      message: "Ok",
-      productsProcessed,
-      emailsSent,
-      totalProducts: products.length,
+      message: "Cron job completed successfully",
+      processed: productsProcessed,
+      emailsSent
     });
   } catch (error) {
-    throw new Error(`Failed to get all products: ${error.message}`);
+    console.error('❌ Cron job error:', error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

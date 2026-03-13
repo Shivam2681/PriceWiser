@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import FavoriteButton from './FavoriteButton';
 import { refreshProductPrice } from '@/lib/actions/product';
@@ -11,13 +11,14 @@ const ProductCard = ({ product }) => {
   const router = useRouter();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const discount = product.discountRate || 
-    Math.round(((product.originalPrice - product.currentPrice) / product.originalPrice) * 100);
+  const discount = useMemo(() => product.discountRate || 
+    Math.round(((product.originalPrice - product.currentPrice) / product.originalPrice) * 100),
+    [product.discountRate, product.originalPrice, product.currentPrice]);
   
-  const isLowestPrice = product.currentPrice === product.lowestPrice;
-  const isPendingData = product.currentPrice === 0;
+  const isLowestPrice = useMemo(() => product.currentPrice === product.lowestPrice, [product.currentPrice, product.lowestPrice]);
+  const isPendingData = useMemo(() => product.currentPrice === 0, [product.currentPrice]);
 
-  const handleRefreshPrice = async (e) => {
+  const handleRefreshPrice = useCallback(async (e) => {
     e.preventDefault();
     e.stopPropagation();
     
@@ -34,7 +35,7 @@ const ProductCard = ({ product }) => {
     } finally {
       setIsRefreshing(false);
     }
-  };
+  }, [isRefreshing, product._id, router]);
   
   return (
     <div className="product-card group relative">

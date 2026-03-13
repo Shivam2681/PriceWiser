@@ -1,21 +1,32 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { debounce } from "@/lib/utils";
 
 export default function ProductSearch({ products, onFilter, placeholder = "Search products..." }) {
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedTerm, setDebouncedTerm] = useState("");
+
+  // Update debounced term with delay
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedTerm(searchTerm);
+    }, 300); // 300ms debounce delay
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   const filteredProducts = useMemo(() => {
-    if (!searchTerm.trim()) return products;
+    if (!debouncedTerm.trim()) return products;
     
-    const term = searchTerm.toLowerCase().trim();
+    const term = debouncedTerm.toLowerCase().trim();
     return products.filter((product) =>
       product.title.toLowerCase().includes(term)
     );
-  }, [products, searchTerm]);
+  }, [products, debouncedTerm]);
 
-  // Notify parent component of filtered results
-  useMemo(() => {
+  // Use useEffect for side effects instead of useMemo
+  useEffect(() => {
     onFilter(filteredProducts);
   }, [filteredProducts, onFilter]);
 
