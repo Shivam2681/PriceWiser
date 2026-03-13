@@ -9,7 +9,7 @@ import { generateEmailBody, sendEmail } from "@/lib/nodemailer";
 // Helper function to add delay between scrapes
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export const maxDuration = 300; // Increased to 5 minutes for safer processing
+export const maxDuration = 60; // Set to 60 seconds (max for Hobby plan) to ensure safe processing
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
