@@ -22,11 +22,14 @@ export async function GET(request) {
     }
 
     console.log('🚀 Cron job started at:', new Date().toISOString());
+    const startTime = Date.now();
+    const TIMEOUT_BUFFER = 50000; // 50 seconds (leave 10s for response/cleanup)
 
     await connectToDB();
     console.log('✅ Connected to database');
 
-    const products = await Product.find({});
+    // Sort by updatedAt to process oldest (stalest) products first
+    const products = await Product.find({}).sort({ updatedAt: 1 });
     console.log(`📦 Found ${products.length} products in database`);
 
     if (!products || products.length === 0) {
@@ -40,10 +43,17 @@ export async function GET(request) {
     const updatedProductsList = [];
     
     for (const currentProduct of products) {
+        // Check if we are approaching the 60s timeout
+        const elapsedTime = Date.now() - startTime;
+        if (elapsedTime > TIMEOUT_BUFFER) {
+          console.log(`\n⏳ Breaking loop to avoid timeout. Elapsed: ${Math.round(elapsedTime / 1000)}s. Remaining products: ${products.length - productsProcessed}`);
+          break;
+        }
+
         console.log(`\n🔍 Processing (${productsProcessed + 1}/${products.length}): ${currentProduct.title}`);
         
-        // Add a small delay between scrapes (e.g., 2 seconds)
-        if (productsProcessed > 0) await delay(2000);
+        // Add a small delay between scrapes (e.g., 1 second)
+        if (productsProcessed > 0) await delay(1000);
 
         // Scrape product
         const scrapedProduct = await scrapeAmazonProduct(currentProduct.url);
