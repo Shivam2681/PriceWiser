@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   AreaChart,
   Area,
@@ -13,6 +13,11 @@ import {
 } from "recharts";
 
 export default function PriceHistoryChart({ priceHistory, currency, originalPrice }) {
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
   const data = useMemo(() => {
     if (!priceHistory || priceHistory.length === 0) return [];
     
@@ -33,6 +38,8 @@ export default function PriceHistoryChart({ priceHistory, currency, originalPric
       };
     });
   }, [priceHistory]);
+
+  if (!hasMounted) return null;
 
   if (data.length === 0) {
     return (

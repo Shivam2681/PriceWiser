@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { RotateCw, Sparkles } from 'lucide-react';
 import { useSession } from "next-auth/react";
 import AuthModal from "../AuthModal";
+import toast from 'react-hot-toast';
 
 const AIRegenerateButton = ({ productId, hasData }) => {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -28,14 +29,15 @@ const AIRegenerateButton = ({ productId, hasData }) => {
       });
 
       if (response.ok) {
+        toast.success('AI insights generated successfully!');
         // Refresh the page to show the new data from DB
         window.location.reload();
       } else {
-        alert('Failed to process AI request. Please check your API key/quota.');
+        toast.error('Failed to generate. Please try again later.');
       }
     } catch (error) {
       console.error('Error with AI action:', error);
-      alert('Error connecting to AI service.');
+      toast.error('Failed to generate. Please try again later.');
     } finally {
       setIsGenerating(false);
     }
