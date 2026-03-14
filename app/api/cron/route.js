@@ -5,6 +5,7 @@ import { connectToDB } from "@/lib/mongoose";
 import Product from "@/lib/models/product.models";
 import { scrapeAmazonProduct } from "@/lib/scraper";
 import { generateEmailBody, sendEmail } from "@/lib/nodemailer";
+import { generateAndStoreAIInsights } from "@/lib/services/aiService";
 
 // Helper function to add delay between scrapes
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));

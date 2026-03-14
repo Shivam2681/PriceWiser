@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectToDB } from "@/lib/mongoose";
 import Product from "@/lib/models/product.models";
-import { getAIFeatureExtraction } from "@/lib/utils/ai/aiFeatureExtraction.js";
 
 export async function GET(request) {
   try {
@@ -13,41 +12,13 @@ export async function GET(request) {
     }
 
     await connectToDB();
-
-    const product = await Product.findById(productId);
+    const product = await Product.findById(productId).lean();
 
     if (!product) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
-    // Check if features are cached (not older than 30 days)
-    const now = new Date();
-    const lastUpdated = product.aiInsights?.features?.lastUpdated;
-    const isCacheValid = lastUpdated && (now.getTime() - lastUpdated.getTime()) < 30 * 24 * 60 * 60 * 1000;
-
-    if (isCacheValid) {
-      return NextResponse.json(product.aiInsights.features);
-    }
-
-    // Call Gemini for feature extraction
-    const extractionResult = await getAIFeatureExtraction(product);
-
-    if (!extractionResult || !extractionResult.features) {
-      return NextResponse.json({ error: "Failed to extract features" }, { status: 500 });
-    }
-
-    // Cache the result in MongoDB
-    product.aiInsights = {
-      ...product.aiInsights,
-      features: {
-        specifications: extractionResult.features,
-        lastUpdated: now,
-      },
-    };
-
-    await product.save();
-
-    return NextResponse.json(product.aiInsights.features);
+    return NextResponse.json(product.aiInsights?.features || null);
   } catch (error) {
     console.error("AI Feature Extraction API Error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });

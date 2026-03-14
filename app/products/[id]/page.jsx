@@ -8,6 +8,7 @@ import TrackButton from "@/components/TrackButton";
 import AIPricePredictionCard from "@/components/ai/AIPricePredictionCard.jsx";
 import AIProductSummaryCard from "@/components/ai/AIProductSummaryCard.jsx";
 import ProductFeaturesCard from "@/components/ai/ProductFeaturesCard.jsx";
+import AIRegenerateButton from "@/components/ai/AIRegenerateButton";
 import { getProductById, getSimilarProducts } from "@/lib/actions"
 import { isUserTrackingProduct } from "@/lib/actions/user";
 import { formatNumber } from "@/lib/utils";
@@ -176,18 +177,25 @@ async function ProductDetails({ params: { id } }) {
       </div>
 
       {/* AI Insights Section */}
-      <div className="mt-12 space-y-8">
-        <h3 className="section-text flex items-center gap-2">
-          AI Powered Insights
-          <span className="text-xs font-normal text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-100 uppercase tracking-wider">Experimental</span>
-        </h3>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <AIPricePredictionCard productId={id} />
-          <AIProductSummaryCard productId={id} />
+      <div className="mt-12 space-y-6 sm:space-y-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <h3 className="section-text flex items-center gap-2">
+            AI Powered Insights
+            <span className="text-[10px] sm:text-xs font-normal text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-100 uppercase tracking-wider">Experimental</span>
+          </h3>
+          <div className="w-full sm:w-fit">
+            <AIRegenerateButton productId={id} hasData={!!product.aiInsights?.summary?.content} />
+          </div>
         </div>
         
-        <ProductFeaturesCard productId={id} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+          <AIPricePredictionCard productId={id} initialData={product.aiInsights?.pricePrediction} />
+          <AIProductSummaryCard productId={id} initialData={product.aiInsights?.summary} />
+        </div>
+        
+        <div className="w-full">
+          <ProductFeaturesCard productId={id} initialData={product.aiInsights?.features} />
+        </div>
       </div>
 
       <div className="flex flex-col gap-16 mt-10">
