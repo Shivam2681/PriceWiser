@@ -6,14 +6,23 @@ import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 
 const isValidAmazonURL = (url) => {
+  if (!url) return false;
+  
+  let targetUrl = url;
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    targetUrl = `https://${url}`;
+  }
+
   try {
-    const parsedURL = new URL(url);
+    const parsedURL = new URL(targetUrl);
     const hostname = parsedURL.hostname;
 
     return hostname.includes('amazon.com') || 
            hostname.includes('amazon.in') || 
            hostname.includes('amazon.co.uk') ||
-           hostname.includes('amazon.ca');
+           hostname.includes('amazon.ca') ||
+           hostname.includes('amzn.in') ||
+           hostname.includes('amzn.to');
   } catch (error) {
     return false;
   }
