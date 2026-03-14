@@ -50,6 +50,41 @@ export default function PriceHistoryChart({ priceHistory, currency, originalPric
 
   const prices = data.map((d) => d.price);
   const minPrice = Math.min(...prices);
+
+  function getPriceTrend(prices) { 
+    if (prices.length < 2) return "stable"; 
+  
+    const current = prices[prices.length - 1]; 
+    const previous = prices[prices.length - 2]; 
+    const lowest = Math.min(...prices); 
+  
+    if (current === lowest) return "best"; 
+    if (current < previous) return "dropping"; 
+    if (current > previous) return "rising"; 
+  
+    return "stable"; 
+  } 
+
+  const trendStyles = { 
+    best: { 
+      text: "🔥 Best price in 30 days", 
+      class: "bg-green-100 text-green-700" 
+    }, 
+    dropping: { 
+      text: "📉 Price dropping", 
+      class: "bg-blue-100 text-blue-700" 
+    }, 
+    rising: { 
+      text: "📈 Price rising", 
+      class: "bg-red-100 text-red-700" 
+    }, 
+    stable: { 
+      text: "➖ Price stable", 
+      class: "bg-gray-100 text-gray-600" 
+    } 
+  }; 
+
+  const trend = getPriceTrend(prices);
   const maxPriceFromHistory = Math.max(...prices);
   // Use originalPrice if provided and higher than history max
   const maxPrice = originalPrice && originalPrice > maxPriceFromHistory ? originalPrice : maxPriceFromHistory;
@@ -75,28 +110,33 @@ export default function PriceHistoryChart({ priceHistory, currency, originalPric
       {/* Header */}
       <div className="px-6 py-5 border-b border-gray-100">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
+          <div className="flex items-center gap-3">
             <h3 className="text-xl font-bold text-gray-900">Price History</h3>
-            <p className="text-sm text-gray-500 mt-1">
+            <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tight ${trendStyles[trend].class}`}> 
+              {trendStyles[trend].text} 
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <p className="text-sm text-gray-500">
               {data.length} data point{data.length !== 1 ? 's' : ''} tracked
             </p>
+            {priceChange !== 0 && (
+              <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold ${
+                priceChange < 0 
+                  ? "bg-green-50 text-green-700" 
+                  : "bg-red-50 text-red-700"
+              }`}>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {priceChange < 0 ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                  )}
+                </svg>
+                {Math.abs(priceChangePercent).toFixed(1)}% {priceChange < 0 ? 'decrease' : 'increase'}
+              </div>
+            )}
           </div>
-          {priceChange !== 0 && (
-            <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold ${
-              priceChange < 0 
-                ? "bg-green-50 text-green-700" 
-                : "bg-red-50 text-red-700"
-            }`}>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {priceChange < 0 ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                )}
-              </svg>
-              {Math.abs(priceChangePercent).toFixed(1)}% {priceChange < 0 ? 'decrease' : 'increase'}
-            </div>
-          )}
         </div>
       </div>
 
@@ -171,7 +211,21 @@ export default function PriceHistoryChart({ priceHistory, currency, originalPric
                 stroke="#3B82F6"
                 strokeWidth={3}
                 fill="url(#priceGradient)"
-                dot={{ fill: "#3B82F6", strokeWidth: 2, stroke: "#fff", r: 5 }}
+                dot={(props) => {
+                  const { cx, cy, payload } = props;
+                  const isLowest = payload.price === minPrice;
+                  return (
+                    <circle 
+                      key={`dot-${payload.index}`}
+                      cx={cx} 
+                      cy={cy} 
+                      r={isLowest ? 6 : 4} 
+                      fill={isLowest ? "#10B981" : "#3B82F6"} 
+                      stroke="#fff" 
+                      strokeWidth={2} 
+                    />
+                  );
+                }}
                 activeDot={{ r: 7, fill: "#2563EB", stroke: "#fff", strokeWidth: 3 }}
               />
             </AreaChart>

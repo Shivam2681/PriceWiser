@@ -5,6 +5,9 @@ import PriceHistoryChart from "@/components/PriceHistoryChart";
 import DeleteProductButton from "@/components/DeleteProductButton";
 import FavoriteButton from "@/components/FavoriteButton";
 import TrackButton from "@/components/TrackButton";
+import AIPricePredictionCard from "@/components/ai/AIPricePredictionCard.jsx";
+import AIProductSummaryCard from "@/components/ai/AIProductSummaryCard.jsx";
+import ProductFeaturesCard from "@/components/ai/ProductFeaturesCard.jsx";
 import { getProductById, getSimilarProducts } from "@/lib/actions"
 import { isUserTrackingProduct } from "@/lib/actions/user";
 import { formatNumber } from "@/lib/utils";
@@ -170,6 +173,21 @@ async function ProductDetails({ params: { id } }) {
           currency={product.currency}
           originalPrice={product.originalPrice}
         />
+      </div>
+
+      {/* AI Insights Section */}
+      <div className="mt-12 space-y-8">
+        <h3 className="section-text flex items-center gap-2">
+          AI Powered Insights
+          <span className="text-xs font-normal text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-100 uppercase tracking-wider">Experimental</span>
+        </h3>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <AIPricePredictionCard productId={id} />
+          <AIProductSummaryCard productId={id} />
+        </div>
+        
+        <ProductFeaturesCard productId={id} />
       </div>
 
       <div className="flex flex-col gap-16 mt-10">
