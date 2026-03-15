@@ -173,6 +173,8 @@ async function ProductDetails({ params: { id } }) {
           priceHistory={plainPriceHistory} 
           currency={product.currency}
           originalPrice={product.originalPrice}
+          lowestPrice={product.lowestPrice}
+          highestPrice={product.highestPrice}
         />
       </div>
 

@@ -12,7 +12,7 @@ import {
   ReferenceLine,
 } from "recharts";
 
-export default function PriceHistoryChart({ priceHistory, currency, originalPrice }) {
+export default function PriceHistoryChart({ priceHistory, currency, originalPrice, lowestPrice, highestPrice }) {
   const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
@@ -56,7 +56,13 @@ export default function PriceHistoryChart({ priceHistory, currency, originalPric
   }
 
   const prices = data.map((d) => d.price);
-  const minPrice = Math.min(...prices);
+  // Use lowestPrice from props if available and valid, otherwise calculate from history
+  const minPrice = (lowestPrice && lowestPrice > 0) ? lowestPrice : Math.min(...prices);
+  
+  // Use highestPrice from props if available and valid, otherwise calculate from history
+  const maxPriceFromHistory = Math.max(...prices);
+  const maxPriceCalculated = originalPrice && originalPrice > maxPriceFromHistory ? originalPrice : maxPriceFromHistory;
+  const maxPrice = (highestPrice && highestPrice > 0) ? Math.max(highestPrice, maxPriceCalculated) : maxPriceCalculated;
 
   function getPriceTrend(prices) { 
     if (prices.length < 2) return "stable"; 
@@ -92,9 +98,6 @@ export default function PriceHistoryChart({ priceHistory, currency, originalPric
   }; 
 
   const trend = getPriceTrend(prices);
-  const maxPriceFromHistory = Math.max(...prices);
-  // Use originalPrice if provided and higher than history max
-  const maxPrice = originalPrice && originalPrice > maxPriceFromHistory ? originalPrice : maxPriceFromHistory;
   const avgPrice = prices.reduce((a, b) => a + b, 0) / prices.length;
   const currentPrice = prices[prices.length - 1];
   const priceChange = prices.length > 1 ? currentPrice - prices[0] : 0;
@@ -107,7 +110,7 @@ export default function PriceHistoryChart({ priceHistory, currency, originalPric
 
   const stats = [
     { label: "Current", value: currentPrice, color: "text-blue-600" },
-    { label: "Lowest", value: minPrice, color: "text-green-600" },
+    { label: "Lowest", value: minPrice, color: "text-green-600", isLowest: true },
     { label: "Highest", value: maxPrice, color: "text-red-600", isOriginal: originalPrice && originalPrice > maxPriceFromHistory },
     { label: "Average", value: Math.round(avgPrice), color: "text-purple-600" },
   ];

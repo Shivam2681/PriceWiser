@@ -4,7 +4,7 @@ import { getUpdatedPriceData, getEmailNotifType } from "@/lib/utils";
 import { connectToDB } from "@/lib/mongoose";
 import Product from "@/lib/models/product.models";
 import { scrapeAmazonProduct } from "@/lib/scraper";
-import { generateEmailBody, sendEmail } from "@/lib/nodemailer";
+import { generateEmailBody, sendEmail, Notification } from "@/lib/nodemailer";
 import { generateAndStoreAIInsights } from "@/lib/services/aiService";
 
 // Helper function to add delay between scrapes
@@ -67,17 +67,36 @@ export async function GET(request) {
         
         console.log(`  ✅ Scraped - Current price: ${scrapedProduct.currentPrice}, Users: ${currentProduct.users.length}`);
 
-        // Use shared utility for price history and stats
-        const { priceHistory, lowestPrice, highestPrice, averagePrice } = 
-          getUpdatedPriceData(currentProduct.priceHistory, scrapedProduct.currentPrice);
+        // Only update price history and stats if we got a valid price
+        let updatedData;
+        
+        if (scrapedProduct.currentPrice && scrapedProduct.currentPrice > 0) {
+          // Use shared utility for price history and stats with valid price
+          const { priceHistory, lowestPrice, highestPrice, averagePrice } = 
+            getUpdatedPriceData(currentProduct.priceHistory, scrapedProduct.currentPrice);
 
-        const updatedData = {
-          ...scrapedProduct,
-          priceHistory,
-          lowestPrice,
-          highestPrice,
-          averagePrice,
-        };
+          updatedData = {
+            ...scrapedProduct,
+            priceHistory,
+            lowestPrice,
+            highestPrice,
+            averagePrice,
+          };
+          
+          console.log(`  📊 Price stats updated - Lowest: ₹${lowestPrice}, Highest: ₹${highestPrice}, Avg: ₹${averagePrice}`);
+        } else {
+          // Scraped price is invalid (zero/pending), keep existing price history and stats
+          console.log(`  ⚠️  Invalid scraped price (₹${scrapedProduct.currentPrice}), preserving existing stats`);
+          
+          updatedData = {
+            ...scrapedProduct,
+            currentPrice: currentProduct.currentPrice, // Keep old price
+            priceHistory: currentProduct.priceHistory, // Keep old history
+            lowestPrice: currentProduct.lowestPrice,   // Keep old lowest
+            highestPrice: currentProduct.highestPrice, // Keep old highest
+            averagePrice: currentProduct.averagePrice, // Keep old average
+          };
+        }
 
         // Update Products in DB
         const updatedProduct = await Product.findOneAndUpdate(
@@ -96,6 +115,17 @@ export async function GET(request) {
 
         if (emailNotifType && updatedProduct.users.length > 0) {
           console.log(`  📧 Email notification type: ${emailNotifType}`);
+          
+          // Calculate actual discount percentage based on previous price (for THRESHOLD_MET)
+          let emailDiscountRate = updatedProduct.discountRate;
+          if (emailNotifType === Notification.THRESHOLD_MET) {
+            const lastHistoricalPrice = currentProduct.priceHistory[currentProduct.priceHistory.length - 1]?.price || currentProduct.currentPrice;
+            if (lastHistoricalPrice > 0 && updatedProduct.currentPrice > 0) {
+              emailDiscountRate = Math.round(((lastHistoricalPrice - updatedProduct.currentPrice) / lastHistoricalPrice) * 100);
+              console.log(`  💰 Calculated discount: ${emailDiscountRate}% (from ₹${lastHistoricalPrice} to ₹${updatedProduct.currentPrice})`);
+            }
+          }
+          
           const productInfo = {
             title: updatedProduct.title,
             url: updatedProduct.url,
@@ -103,7 +133,7 @@ export async function GET(request) {
             currency: updatedProduct.currency,
             currentPrice: updatedProduct.currentPrice,
             originalPrice: updatedProduct.originalPrice,
-            discountRate: updatedProduct.discountRate,
+            discountRate: emailDiscountRate, // Use calculated discount for threshold emails
           };
           // Construct emailContent
           const emailContent = await generateEmailBody(productInfo, emailNotifType);
