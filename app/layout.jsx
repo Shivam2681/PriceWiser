@@ -1,4 +1,5 @@
 import Navbar from '@/components/Navbar'
+import Footer from '@/components/Footer'
 import ToastProvider from '@/components/ui/ToastProvider'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import Providers from '@/components/Providers'
@@ -178,12 +179,15 @@ export default async function RootLayout({ children }) {
         <Providers session={session}>
           <ToastProvider />
 
-          <main className="">
+          <div className="flex flex-col min-h-screen">
             <Navbar />
-            <ErrorBoundary>
-              {children}
-            </ErrorBoundary>
-          </main>
+            <main className="flex-1">
+              <ErrorBoundary>
+                {children}
+              </ErrorBoundary>
+            </main>
+            {/* <Footer /> */}
+          </div>
         </Providers>
       </body>
     </html>

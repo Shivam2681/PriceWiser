@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PriceWiser - Track This Product</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 350px;
+      min-height: 400px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #1f2937;
+    }
+
+    .container {
+      background: white;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+    }
+
+    .logo-text {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .tagline {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    /* Content */
+    .content {
+      padding: 20px;
+      flex: 1;
+    }
+
+    /* Status Card */
+    .status-card {
+      background: #f3f4f6;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .status-label {
+      font-size: 13px;
+      color: #6b7280;
+      font-weight: 500;
+    }
+
+    .status-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1f2937;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .status-badge.success {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-badge.pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-badge.error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    /* Product Info */
+    .product-info {
+      margin-bottom: 16px;
+    }
+
+    .product-title {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #1f2937;
+      margin-bottom: 8px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .product-price {
+      font-size: 24px;
+      font-weight: 700;
+      color: #10b981;
+      margin-right: 8px;
+    }
+
+    .original-price {
+      font-size: 14px;
+      color: #9ca3af;
+      text-decoration: line-through;
+    }
+
+    .discount-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      background: #fee2e2;
+      color: #ef4444;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-left: 8px;
+    }
+
+    .product-platform {
+      display: inline-block;
+      padding: 4px 12px;
+      background: #e5e7eb;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #6b7280;
+      margin-top: 8px;
+    }
+
+    /* Buttons */
+    .btn {
+      width: 100%;
+      padding: 12px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: #f3f4f6;
+      color: #374151;
+    }
+
+    .btn-secondary:hover {
+      background: #e5e7eb;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Loading State */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid #e5e7eb;
+      border-top-color: #667eea;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Login Screen */
+    .login-screen {
+      text-align: center;
+      padding: 30px 20px;
+    }
+
+    .login-icon {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 16px;
+      opacity: 0.8;
+    }
+
+    .login-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #1f2937;
+    }
+
+    .login-description {
+      font-size: 13px;
+      color: #6b7280;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    /* Error Message */
+    .error-message {
+      background: #fee2e2;
+      color: #991b1b;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      border-left: 3px solid #ef4444;
+    }
+
+    /* Success Message */
+    .success-message {
+      background: #d1fae5;
+      color: #065f46;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      border-left: 3px solid #10b981;
+    }
+
+    /* Footer */
+    .footer {
+      padding: 16px 20px;
+      background: #f9fafb;
+      border-top: 1px solid #e5e7eb;
+      text-align: center;
+    }
+
+    .footer-link {
+      font-size: 12px;
+      color: #6b7280;
+      text-decoration: none;
+    }
+
+    .footer-link:hover {
+      color: #667eea;
+    }
+
+    /* Utility */
+    .hidden {
+      display: none !important;
+    }
+
+    .mb-2 {
+      margin-bottom: 8px;
+    }
+
+    .mt-4 {
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <svg width="27" height="27" viewBox="0 0 27 27" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path opacity="0.4" d="M20.212 7.37784L18.1533 5.31909C16.4152 3.58097 15.5467 2.71134 14.4183 2.38847C13.2899 2.06447 12.0918 2.34122 9.69665 2.89472L8.31515 3.21309C6.29915 3.67772 5.29115 3.91059 4.6004 4.60022C3.91078 5.29097 3.6779 6.29897 3.21328 8.31497L2.89378 9.69647C2.3414 12.0927 2.06465 13.2897 2.38753 14.4181C2.71153 15.5465 3.58115 16.415 5.31928 18.1531L7.37803 20.2118C10.4043 23.2392 11.9163 24.7501 13.795 24.7501C15.6749 24.7501 17.1869 23.237 20.212 20.2118C23.2394 17.1867 24.7503 15.6747 24.7503 13.7948C24.7503 11.9161 23.2372 10.403 20.212 7.37784Z" fill="white"/>
+          <path d="M12.5405 16.1191C11.7834 15.3631 11.7902 14.2763 12.2424 13.4157C12.1302 13.2536 12.0783 13.0573 12.0957 12.8609C12.1131 12.6645 12.1988 12.4803 12.3378 12.3405C12.4768 12.2007 12.6604 12.114 12.8567 12.0954C13.0531 12.0769 13.2497 12.1276 13.4124 12.239C13.7949 12.0365 14.2145 11.9285 14.633 11.933C14.8568 11.935 15.0706 12.0259 15.2274 12.1856C15.3841 12.3454 15.471 12.5608 15.4689 12.7846C15.4668 13.0084 15.3759 13.2221 15.2162 13.3789C15.0565 13.5356 14.8411 13.6225 14.6173 13.6205C14.3568 13.6301 14.1106 13.7421 13.9322 13.9321C13.4968 14.3675 13.6115 14.804 13.733 14.9266C13.8568 15.0492 14.2922 15.1628 14.7275 14.7275C15.6095 13.8455 17.1328 13.553 18.1093 14.5283C18.8664 15.2855 18.8597 16.3722 18.4063 17.2328C18.5178 17.395 18.5692 17.591 18.5514 17.787C18.5337 17.983 18.448 18.1667 18.3092 18.3062C18.1703 18.4457 17.9871 18.5322 17.7912 18.5509C17.5953 18.5696 17.399 18.5192 17.2363 18.4085C16.7314 18.6854 16.1459 18.7776 15.5803 18.6695C15.4717 18.6471 15.3686 18.6037 15.2768 18.5415C15.185 18.4793 15.1064 18.3997 15.0454 18.3071C14.9844 18.2146 14.9422 18.1109 14.9212 18.0021C14.9003 17.8932 14.901 17.7813 14.9233 17.6727C14.9456 17.5641 14.9891 17.461 15.0512 17.3692C15.1134 17.2774 15.193 17.1988 15.2856 17.1378C15.3782 17.0768 15.4818 17.0346 15.5907 17.0136C15.6995 16.9927 15.8115 16.9934 15.92 17.0157C16.1192 17.0573 16.4409 16.9921 16.7165 16.7165C17.153 16.28 17.0383 15.8446 16.9157 15.722C16.793 15.5993 16.3577 15.4857 15.9212 15.9211C15.0392 16.8031 13.5159 17.0956 12.5405 16.1191ZM11.2738 11.5797C11.4887 11.3721 11.6601 11.1239 11.778 10.8494C11.8959 10.5749 11.958 10.2796 11.9606 9.98086C11.9632 9.6821 11.9063 9.38582 11.7931 9.10931C11.68 8.83279 11.5129 8.58157 11.3017 8.37031C11.0904 8.15905 10.8392 7.99199 10.5627 7.87885C10.2862 7.76572 9.9899 7.70879 9.69114 7.71139C9.39239 7.71398 9.09714 7.77605 8.82264 7.89397C8.54813 8.01189 8.29985 8.1833 8.09229 8.3982C7.68244 8.82256 7.45565 9.39091 7.46078 9.98086C7.4659 10.5708 7.70254 11.1239 8.13015 11.5515C8.55778 11.9791 9.11078 12.2157 9.70078 12.2208C10.2908 12.226 10.8591 11.9991 11.2835 11.5893L11.2738 11.5797Z" fill="white"/>
+        </svg>
+        <span class="logo-text">PriceWiser</span>
+      </div>
+      <p class="tagline">Smart Price Tracker</p>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+      <!-- Loading State -->
+      <div id="loading-view" class="loading">
+        <div class="spinner"></div>
+      </div>
+
+      <!-- Login View -->
+      <div id="login-view" class="login-screen hidden">
+        <svg class="login-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+        <h2 class="login-title">Login Required</h2>
+        <p class="login-description">
+          Login to your PriceWiser account to track prices and get notified about drops.
+        </p>
+        <button id="login-btn" class="btn btn-primary mb-2">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+            <polyline points="10 17 15 12 10 7"/>
+            <line x1="15" y1="12" x2="3" y2="12"/>
+          </svg>
+          Open Dashboard & Login
+        </button>
+        <p class="login-description" style="margin-top: 16px; font-size: 12px;">
+          Already logged in on the website?
+        </p>
+        <button id="sync-token-btn" class="btn btn-secondary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M23 4v6h-6"/>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+          </svg>
+          Sync Token from Website
+        </button>
+        <div id="token-status" class="mt-4" style="font-size: 12px; color: #6b7280;"></div>
+      </div>
+
+      <!-- Product View -->
+      <div id="product-view" class="hidden">
+        <div class="status-card">
+          <div class="status-row mb-2">
+            <span class="status-label">Status</span>
+            <span id="status-badge" class="status-badge pending">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+              Detecting...
+            </span>
+          </div>
+          <div class="status-row">
+            <span class="status-label">Last Sync</span>
+            <span id="last-sync" class="status-value">Never</span>
+          </div>
+        </div>
+
+        <div class="product-info">
+          <h3 id="product-title" class="product-title">Loading...</h3>
+          <div id="product-price-container" style="display: flex; align-items: baseline; flex-wrap: wrap;">
+            <div id="product-price" class="product-price">--</div>
+            <div id="original-price" class="original-price hidden"></div>
+            <div id="discount-badge" class="discount-badge hidden"></div>
+          </div>
+          <span id="product-platform" class="product-platform">--</span>
+        </div>
+
+        <div id="error-container" class="error-message hidden"></div>
+        <div id="success-container" class="success-message hidden"></div>
+
+        <button id="track-btn" class="btn btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Track This Product
+        </button>
+
+        <button id="refresh-btn" class="btn btn-secondary mt-4">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 4 23 10 17 10"/>
+            <polyline points="1 20 1 14 7 14"/>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+          </svg>
+          Refresh Data
+        </button>
+
+        <button id="redetect-btn" class="btn btn-secondary mt-2" style="display: none;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          Re-detect Product (After Login)
+        </button>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <a href="https://price-wiser-coral.vercel.app/" target="_blank" class="footer-link">
+        Open Dashboard →
+      </a>
+    </div>
+  </div>
+
+  <!-- Load storage utils first (as it has no dependencies) -->
+  <script src="../utils/storage.js" type="module"></script>
+  <!-- Then load popup script -->
+  <script src="popup.js" type="module"></script>
+</body>
+</html>

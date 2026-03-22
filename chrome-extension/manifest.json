@@ -1,0 +1,89 @@
+{
+  "manifest_version": 3,
+  "name": "PriceWiser - Smart Price Tracker",
+  "version": "1.0.1",
+  "description": "Automatically track and sync product prices from Amazon & Flipkart with your PriceWiser dashboard in real-time.",
+  "author": "PriceWiser",
+  "homepage_url": "https://pricewiser.com",
+  
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "PriceWiser - Track This Product"
+  },
+  
+  "background": {
+    "service_worker": "background/background.js",
+    "type": "module"
+  },
+  
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.amazon.com/*",
+        "https://*.amazon.in/*",
+        "https://*.amazon.co.uk/*",
+        "https://*.amazon.ca/*",
+        "https://*.amazon.de/*",
+        "https://*.amazon.fr/*",
+        "https://*.amazon.es/*",
+        "https://*.amazon.it/*",
+        "https://*.amazon.co.jp/*",
+        "https://*.amazon.com.au/*",
+        "https://*.flipkart.com/*"
+      ],
+      "js": ["utils/extractor-content.js", "utils/storage-content.js", "content/contentScript.js"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting",
+    "tabs"
+  ],
+  
+  "optional_permissions": [
+    "cookies"
+  ],
+  
+  "host_permissions": [
+    "https://*.amazon.com/*",
+    "https://*.amazon.in/*",
+    "https://*.amazon.co.uk/*",
+    "https://*.amazon.ca/*",
+    "https://*.amazon.de/*",
+    "https://*.amazon.fr/*",
+    "https://*.amazon.es/*",
+    "https://*.amazon.it/*",
+    "https://*.amazon.co.jp/*",
+    "https://*.amazon.com.au/*",
+    "https://*.flipkart.com/*",
+    "http://localhost:3000/*",
+    "https://pricewiser.com/*"
+  ],
+  
+  "web_accessible_resources": [
+    {
+      "resources": ["styles/*.css"],
+      "matches": [
+        "https://*.amazon.com/*",
+        "https://*.amazon.in/*",
+        "https://*.amazon.co.uk/*",
+        "https://*.amazon.ca/*",
+        "https://*.amazon.de/*",
+        "https://*.amazon.fr/*",
+        "https://*.amazon.es/*",
+        "https://*.amazon.it/*",
+        "https://*.amazon.co.jp/*",
+        "https://*.amazon.com.au/*",
+        "https://*.flipkart.com/*"
+      ]
+    }
+  ],
+  
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+}

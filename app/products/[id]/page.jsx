@@ -223,7 +223,7 @@ async function ProductDetails({ params: { id } }) {
             width={22}
             height={22}
           />
-          <span className="text-base text-white">Buy Now</span>
+          <span className="text-base text-white">Buy on Amazon</span>
         </a>
       </div>
 
