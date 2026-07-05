@@ -82,7 +82,7 @@ export default function TermsOfService() {
             <ul className="list-disc list-inside space-y-2 text-gray-600 ml-4">
               <li>You must provide accurate information when creating an account.</li>
               <li>You are responsible for maintaining the confidentiality of your account credentials.</li>
-              <li>You agree not to use another user's account without permission.</li>
+              <li>You agree not to use another user&apos;s account without permission.</li>
               <li>You may not use automated systems to abuse the service.</li>
             </ul>
           </section>
@@ -101,30 +101,6 @@ export default function TermsOfService() {
             </ul>
           </section>
 
-          {/* Amazon Affiliate */}
-          <section className="mb-10">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Affiliate Disclosure
-            </h2>
-
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-              <p className="text-yellow-800 leading-relaxed">
-                PriceWiser participates in the Amazon Associates Program, 
-                an affiliate advertising program designed to provide a means 
-                for websites to earn advertising fees by advertising and 
-                linking to Amazon.in.
-              </p>
-
-              <p className="text-yellow-800 leading-relaxed mt-4">
-                As an Amazon Associate, we earn from qualifying purchases.
-              </p>
-
-              <p className="text-yellow-800 leading-relaxed mt-4">
-                Amazon® is a trademark of Amazon.com, Inc. or its affiliates.
-              </p>
-            </div>
-          </section>
-
           {/* Disclaimer */}
           <section className="mb-10">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
@@ -132,7 +108,7 @@ export default function TermsOfService() {
             </h2>
 
             <p className="text-gray-600 leading-relaxed">
-              The service is provided "as is" and "as available" without 
+              The service is provided &quot;as is&quot; and &quot;as available&quot; without 
               warranties of any kind. We do not guarantee uninterrupted or 
               error-free service.
             </p>

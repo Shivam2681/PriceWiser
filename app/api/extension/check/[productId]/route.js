@@ -3,6 +3,8 @@ import { connectToDB } from '@/lib/mongoose';
 import Product from '@/lib/models/product.models';
 import { getSession } from '@/lib/auth';
 
+export const dynamic = "force-dynamic";
+
 /**
  * GET /api/extension/check/:productId
  * Check if product is already being tracked

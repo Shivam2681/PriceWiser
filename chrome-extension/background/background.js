@@ -4,7 +4,8 @@
  */
 
 import { trackProduct } from '../utils/api.js';
-import { getAuthToken, updateLastSync, saveAuthToken, getUserId, saveUserId } from '../utils/storage.js';
+import { getWelcomeUrl } from '../utils/config.js';
+import { getAuthToken, updateLastSync, saveAuthToken, saveUserId } from '../utils/storage.js';
 
 // Retry configuration
 const MAX_RETRIES = 3;
@@ -140,9 +141,9 @@ chrome.runtime.onInstalled.addListener((details) => {
   
   if (details.reason === 'install') {
     // Open welcome page on first install
-    chrome.tabs.create({
-      url: 'https://pricewiser.com/welcome',
-    });
+    getWelcomeUrl()
+      .then((url) => chrome.tabs.create({ url }))
+      .catch((error) => console.warn('[Background] Failed to open welcome page:', error.message));
   }
 });
 

@@ -4,13 +4,7 @@
  */
 
 import { getAuthToken } from './storage.js';
-
-// Get the base API URL from environment or use default
-const getBaseURL = () => {
-  // For development, use localhost
-  // For production, use your actual domain
-  return 'http://localhost:3000';
-};
+import { getBackendUrl } from './config.js';
 
 /**
  * Get authorization headers for API requests
@@ -50,7 +44,7 @@ async function getAuthHeaders() {
  * @returns {Promise<Object>} API response
  */
 export async function trackProduct(productData, authToken) {
-  const url = `${getBaseURL()}/api/extension/track`;
+  const url = await getBackendUrl('/api/extension/track');
   
   try {
     console.log('[API] Sending tracking data:', productData);
@@ -95,7 +89,7 @@ export async function trackProduct(productData, authToken) {
  * @returns {Promise<boolean>}
  */
 export async function isProductTracked(productId, authToken) {
-  const url = `${getBaseURL()}/api/extension/check/${productId}`;
+  const url = await getBackendUrl(`/api/extension/check/${productId}`);
   
   try {
     const response = await fetch(url, {
@@ -123,7 +117,7 @@ export async function isProductTracked(productId, authToken) {
  * @returns {Promise<Object|null>} User data or null
  */
 export async function verifyToken(token) {
-  const url = `${getBaseURL()}/api/auth/verify`;
+  const url = await getBackendUrl('/api/auth/verify');
   
   try {
     const response = await fetch(url, {

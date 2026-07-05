@@ -251,6 +251,12 @@
         discountPercentage = Math.round(((originalPrice - currentPrice) / originalPrice) * 100);
       }
 
+      const image =
+        document.querySelector('meta[property="og:image"]')?.getAttribute('content') ||
+        document.querySelector('#landingImage')?.getAttribute('src') ||
+        document.querySelector('#imgBlkFront')?.getAttribute('src') ||
+        '';
+
       // Final sanity check: if currentPrice > originalPrice, they might be swapped
       if (currentPrice && originalPrice && currentPrice > originalPrice) {
         [currentPrice, originalPrice] = [originalPrice, currentPrice];
@@ -273,6 +279,8 @@
         price: currentPrice || 0,
         originalPrice: originalPrice || currentPrice || 0,
         discountPercentage: discountPercentage || 0,
+        currency: '₹',
+        image,
         url,
         productId,
         source: 'amazon',
@@ -400,6 +408,12 @@
       if (discountPercentage === 0 && price && originalPrice && originalPrice > price) {
         discountPercentage = Math.round(((originalPrice - price) / originalPrice) * 100);
       }
+
+      const image =
+        document.querySelector('meta[property="og:image"]')?.getAttribute('content') ||
+        document.querySelector('meta[property="og:image:secure_url"]')?.getAttribute('content') ||
+        document.querySelector('._396cs4 img')?.getAttribute('src') ||
+        '';
       
       // Get current URL
       const url = window.location.href;
@@ -417,6 +431,8 @@
         price: price || 0,
         originalPrice: originalPrice || price || 0,
         discountPercentage: discountPercentage || 0,
+        currency: '₹',
+        image,
         url,
         productId,
         source: 'flipkart',

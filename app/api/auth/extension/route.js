@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
+export const dynamic = "force-dynamic";
+
 /**
  * GET /api/auth/extension
  * Check if user is authenticated and return JWT token for extension use
@@ -22,7 +24,9 @@ export async function GET(req) {
     }
 
     // Get the JWT token from cookies
-    const cookieToken = req.cookies.get('next-auth.session-token')?.value;
+    const cookieToken =
+      req.cookies.get('next-auth.session-token')?.value ||
+      req.cookies.get('__Secure-next-auth.session-token')?.value;
     
     if (!cookieToken) {
       console.log('[Extension Auth] No cookie token found');

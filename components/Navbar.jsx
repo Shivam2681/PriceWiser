@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
 import { useState, useRef, useEffect } from 'react'
+import toast from 'react-hot-toast'
 import AuthModal from './AuthModal'
 
 const Navbar = () => {

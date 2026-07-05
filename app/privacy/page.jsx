@@ -8,7 +8,7 @@ export default function PrivacyPolicy() {
             Privacy Policy
           </h1>
           <p className="text-blue-100">
-            Your privacy is important to us. Here's how we protect your data.
+            Your privacy is important to us. Here&apos;s how we protect your data.
           </p>
         </div>
 
@@ -20,7 +20,7 @@ export default function PrivacyPolicy() {
               Introduction
             </h2>
             <p className="text-gray-600 leading-relaxed mb-4">
-              Welcome to PriceWiser ("we," "our," or "us"). We are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our price tracking services.
+              Welcome to PriceWiser (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;). We are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our price tracking services.
             </p>
             <p className="text-gray-600 leading-relaxed">
               By using PriceWiser, you agree to the collection and use of information in accordance with this policy. If you do not agree with our policies and practices, please do not use our service.
@@ -96,18 +96,6 @@ export default function PrivacyPolicy() {
               <li><strong>Business Transfers:</strong> In connection with a merger, acquisition, or sale of assets (you will be notified via email)</li>
               <li><strong>With Your Consent:</strong> When you explicitly agree to share information</li>
             </ul>
-          </section>
-
-          {/* Amazon Affiliate Disclosure */}
-          <section className="mb-10">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Amazon Affiliate Relationship
-            </h2>
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-              <p className="text-gray-900 leading-relaxed">
-                PriceWiser participates in the Amazon Associates Program, an affiliate advertising program designed to provide a means for sites to earn advertising fees by advertising and linking to Amazon.in. As an Amazon Associate
-              </p>
-            </div>
           </section>
 
           {/* Data Security */}
@@ -220,7 +208,7 @@ export default function PrivacyPolicy() {
           {/* Children's Privacy */}
           <section className="mb-10">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Children's Privacy
+              Children&apos;s Privacy
             </h2>
             <p className="text-gray-600 leading-relaxed">
               Our service is not intended for children under the age of 13. We do not knowingly collect personally identifiable information from children under 13. If you become aware that a child under 13 has provided us with personal information, please contact us and we will take steps to delete such information.
@@ -237,7 +225,7 @@ export default function PrivacyPolicy() {
             </p>
             <ul className="list-disc list-inside space-y-2 text-gray-600 ml-4">
               <li>Posting the new Privacy Policy on this page</li>
-              <li>Updating the "Last updated" date at the bottom of this page</li>
+              <li>Updating the &quot;Last updated&quot; date at the bottom of this page</li>
               <li>Sending you an email notification (for significant changes)</li>
             </ul>
             <p className="text-gray-600 leading-relaxed mt-4">

@@ -56,7 +56,7 @@ const HeroCarousel = () => {
       </Carousel>
 
       <Image 
-        src="assets/icons/hand-drawn-arrow.svg"
+        src="/assets/icons/hand-drawn-arrow.svg"
         alt="arrow"
         width={175}
         height={175}

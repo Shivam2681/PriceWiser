@@ -3,8 +3,8 @@
  * Handles popup UI interactions and displays product information
  */
 
-// Storage functions are available via window.PWStorage (loaded before this script)
-const { getAuthToken, logout, getLastSync } = window.PWStorage;
+import { getAuthToken, getLastSync } from '../utils/storage.js';
+import { getBackendUrl, getAppUrl, getDashboardUrl } from '../utils/config.js';
 
 // DOM Elements
 const loadingView = document.getElementById('loading-view');
@@ -25,6 +25,7 @@ const redetectBtn = document.getElementById('redetect-btn');
 const loginBtn = document.getElementById('login-btn');
 const syncTokenBtn = document.getElementById('sync-token-btn');
 const tokenStatusEl = document.getElementById('token-status');
+const dashboardLinkEl = document.getElementById('dashboard-link');
 
 let currentProductData = null;
 let isTracking = false;
@@ -278,7 +279,7 @@ async function trackProduct() {
 
     // 2. Sync with website (backend)
     console.log('[Popup] Syncing product with backend...');
-    const trackUrl = 'http://localhost:3000/api/extension/track';
+    const trackUrl = await getBackendUrl('/api/extension/track');
     const syncRes = await fetch(trackUrl, {
       method: 'POST',
       headers: {
@@ -304,7 +305,7 @@ async function trackProduct() {
     showSuccess('Opening product page on PriceWiser...');
 
     // 3. Redirect active tab to website product page in a NEW TAB
-    const websiteProductUrl = `http://localhost:3000/products/${productIdInDb}`;
+    const websiteProductUrl = await getAppUrl(`/products/${productIdInDb}`);
     
     // Give user a split second to see success message
     setTimeout(async () => {
@@ -368,11 +369,10 @@ function clearMessages() {
 function openLoginPage() {
   // Open dashboard for login, then redirect back to product page
   const returnUrl = currentTabUrl ? encodeURIComponent(currentTabUrl) : '';
-  chrome.tabs.create({
-    url: `http://localhost:3000/dashboard${returnUrl ? '?returnUrl=' + returnUrl : ''}`,
-  });
-  window.close();
-}
+    const dashboardUrl = await getDashboardUrl(returnUrl ? `?returnUrl=${returnUrl}` : '');
+    chrome.tabs.create({ url: dashboardUrl });
+    window.close();
+  }
 
 /**
  * Sync token from website
@@ -515,6 +515,10 @@ async function init() {
       currentTabUrl = activeTab.url;
       console.log('[Popup] Current tab URL:', currentTabUrl);
     }
+
+    if (dashboardLinkEl) {
+      dashboardLinkEl.href = await getDashboardUrl();
+    }
     
     // First check extension storage
     let authToken = await getAuthToken();
@@ -526,15 +530,15 @@ async function init() {
       // Try to get token from website if user is logged in there
       const websiteToken = await getTokenFromWebsite();
       
-      if (websiteToken) {
+      if (websiteToken?.token && websiteToken?.userId) {
         console.log('[Popup] Got token from website, saving to extension storage');
+        authToken = websiteToken.token;
         // Save to extension storage for future use
         chrome.runtime.sendMessage({
           action: 'SAVE_TOKEN',
           token: websiteToken.token,
           userId: websiteToken.userId,
         }, () => {
-          authToken = websiteToken.token;
           console.log('[Popup] Token saved to storage');
         });
       } else {

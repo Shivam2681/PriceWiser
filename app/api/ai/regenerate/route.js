@@ -1,10 +1,18 @@
 import { NextResponse } from "next/server";
 import { generateAndStoreAIInsights } from "@/lib/services/aiService";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export const maxDuration = 60; // Increase timeout to 60 seconds for AI generation
+export const dynamic = "force-dynamic";
 
 export async function POST(request) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { productId, forceRefresh } = await request.json();
 
     if (!productId) {
