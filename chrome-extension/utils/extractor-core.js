@@ -1,11 +1,10 @@
 /**
- * PriceWiser Extension - Content Script Extractor (NON-MODULE VERSION)
- * For use in content scripts (loaded as regular scripts, not modules)
+ * PriceWiser Extension - Shared Extractor Core
+ * Loaded directly in content scripts and kept on window for module wrappers.
  */
 
 (function() {
   // Make functions available globally for content script access
-  window.ExtractorFunctions = window.ExtractorFunctions || {};
 
   /**
    * Clean price string to number
@@ -488,11 +487,13 @@
     return false;
   }
 
-  // Export functions to global window object for content script
-  window.ExtractorFunctions = {
+  const extractorCore = {
     detectPlatform,
     isValidProductPage,
     extractAmazonData,
     extractFlipkartData,
   };
+
+  globalThis.PriceWiserExtractorCore = extractorCore;
+  window.ExtractorFunctions = extractorCore;
 })();

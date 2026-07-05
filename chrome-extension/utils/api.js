@@ -10,8 +10,8 @@ import { getBackendUrl } from './config.js';
  * Get authorization headers for API requests
  * @returns {Promise<Object>} Headers object
  */
-async function getAuthHeaders() {
-  const token = await getAuthToken();
+async function getAuthHeaders(authToken) {
+  const token = authToken || await getAuthToken();
   
   // If using cookie-based auth (token is 'cookie-auth')
   if (token === 'cookie-auth') {
@@ -50,7 +50,7 @@ export async function trackProduct(productData, authToken) {
     console.log('[API] Sending tracking data:', productData);
     
     // Get proper auth headers
-    const authHeaders = await getAuthHeaders();
+    const authHeaders = await getAuthHeaders(authToken);
     
     const response = await fetch(url, {
       method: 'POST',

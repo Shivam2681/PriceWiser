@@ -69,7 +69,7 @@ export async function GET(req, { params }) {
       });
     }
 
-    const isTracked = product.users.some(u => u.email && u.email.toLowerCase() === userEmail.toLowerCase());
+    const isTracked = Array.isArray(product.users) && product.users.some(u => u.email && u.email.toLowerCase() === userEmail.toLowerCase());
     console.log('[Extension API] Track status for', userEmail, ':', isTracked);
 
     return NextResponse.json({

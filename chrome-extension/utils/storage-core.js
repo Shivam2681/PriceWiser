@@ -1,16 +1,10 @@
 /**
- * PriceWiser Extension - Content Script Utils (NON-MODULE VERSION)
- * For use in content scripts (loaded as regular scripts, not modules)
+ * PriceWiser Extension - Shared Storage Core
+ * Loaded directly in content scripts and imported by module wrappers.
  */
 
 (function() {
-  // Check if we're in a browser context with window object
   const isBrowserContext = typeof window !== 'undefined';
-
-  // Make functions available globally for content script use
-  if (isBrowserContext) {
-    window.PWStorage = window.PWStorage || {};
-  }
 
   const STORAGE_KEYS = {
     AUTH_TOKEN: 'authToken',
@@ -149,21 +143,25 @@
     await saveToStorage(STORAGE_KEYS.LAST_SYNC, new Date().toISOString());
   }
 
-  // Export all functions to window for content script access
+  const storageCore = {
+    STORAGE_KEYS,
+    saveToStorage,
+    getFromStorage,
+    removeFromStorage,
+    clearAllStorage,
+    getAuthToken,
+    saveAuthToken,
+    isLoggedIn,
+    logout,
+    getUserId,
+    saveUserId,
+    getLastSync,
+    updateLastSync,
+  };
+
+  globalThis.PriceWiserStorageCore = storageCore;
+
   if (isBrowserContext) {
-    window.PWStorage = {
-      saveToStorage,
-      getFromStorage,
-      removeFromStorage,
-      clearAllStorage,
-      getAuthToken,
-      saveAuthToken,
-      isLoggedIn,
-      logout,
-      getUserId,
-      saveUserId,
-      getLastSync,
-      updateLastSync,
-    };
+    window.PWStorage = storageCore;
   }
 })();

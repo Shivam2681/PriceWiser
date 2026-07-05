@@ -4,7 +4,7 @@
  */
 
 import { getAuthToken, getLastSync } from '../utils/storage.js';
-import { getBackendUrl, getAppUrl, getDashboardUrl } from '../utils/config.js';
+import { getBackendUrl, getAppUrl, getDashboardUrl, getAppBaseUrl } from '../utils/config.js';
 
 // DOM Elements
 const loadingView = document.getElementById('loading-view');
@@ -366,13 +366,13 @@ function clearMessages() {
 /**
  * Open login page
  */
-function openLoginPage() {
+async function openLoginPage() {
   // Open dashboard for login, then redirect back to product page
   const returnUrl = currentTabUrl ? encodeURIComponent(currentTabUrl) : '';
-    const dashboardUrl = await getDashboardUrl(returnUrl ? `?returnUrl=${returnUrl}` : '');
-    chrome.tabs.create({ url: dashboardUrl });
-    window.close();
-  }
+  const dashboardUrl = await getDashboardUrl(returnUrl ? `?returnUrl=${returnUrl}` : '');
+  chrome.tabs.create({ url: dashboardUrl });
+  window.close();
+}
 
 /**
  * Sync token from website
@@ -444,23 +444,24 @@ async function getTokenFromWebsite() {
     }
     
     const url = new URL(tabUrl);
+    const appBaseUrl = new URL(await getAppBaseUrl());
     
-    // Only try if on pricewiser.com or localhost
+    // Only try if on the configured app origin or localhost
     const isLocalhost = url.hostname === 'localhost' && url.port === '3000';
-    const isPriceWiser = url.hostname.includes('pricewiser');
+    const isAppOrigin = url.origin === appBaseUrl.origin;
     
-    if (!isLocalhost && !isPriceWiser) {
-      console.log('[Popup] Not on PriceWiser domain:', url.hostname);
+    if (!isLocalhost && !isAppOrigin) {
+      console.log('[Popup] Not on PriceWiser app domain:', url.hostname);
       return { token: null, userId: null };
     }
     
     // Call the extension auth endpoint to check auth status
-    const authCheckUrl = `${url.protocol}//${url.host}/api/auth/extension`;
+    const authCheckUrl = `${url.origin}/api/auth/extension`;
     
     console.log('[Popup] Checking auth at:', authCheckUrl);
     console.log('[Popup] Current tab URL:', tabUrl);
     console.log('[Popup] Is localhost:', isLocalhost);
-    console.log('[Popup] Is PriceWiser:', isPriceWiser);
+    console.log('[Popup] Is app origin:', isAppOrigin);
     
     try {
       const response = await fetch(authCheckUrl, {

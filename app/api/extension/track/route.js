@@ -4,6 +4,7 @@ import Product from '@/lib/models/product.models';
 import { getSession } from '@/lib/auth';
 import { scrapeProduct } from '@/lib/scraper';
 import { addUserEmailToProduct } from '@/lib/actions';
+import { createInitialPriceStats, normalizeProductPayload } from '@/lib/utils/productNormalization';
 
 export const dynamic = "force-dynamic";
 
@@ -44,10 +45,7 @@ export async function POST(req) {
     // Connect to database
     await connectToDB();
 
-    const currentPrice = Number(body.price || body.currentPrice || 0);
-    const originalPrice = Number(body.originalPrice || currentPrice || 0);
-    const discountRate = Number(body.discountRate || body.discountPercentage || 0);
-
+    const extensionPayload = normalizeProductPayload(body, { url, productId, source });
     let normalizedProduct = null;
     if (source === 'amazon') {
       // Perform a full scrape to get all required data (images, category, description etc)
@@ -59,31 +57,27 @@ export async function POST(req) {
         throw new Error('Failed to scrape product data');
       }
 
-      normalizedProduct = {
-        ...scrapedProduct,
-        productId,
-        source,
-      };
+      normalizedProduct = normalizeProductPayload(scrapedProduct, extensionPayload);
     } else {
-      normalizedProduct = {
-        url,
-        productId,
-        source,
-        currency: body.currency || '₹',
-        image: body.image || '/assets/icons/logo.svg',
-        title: body.title || 'Unknown Product',
-        currentPrice,
-        originalPrice,
-        discountRate,
-        category: body.category || 'General',
-        reviewsCount: Number(body.reviewsCount || 0),
-        isOutOfStock: Boolean(body.isOutOfStock),
-        priceHistory: [{ price: currentPrice, date: new Date() }],
-        lowestPrice: currentPrice,
-        highestPrice: Math.max(currentPrice, originalPrice),
-        averagePrice: currentPrice,
-      };
+      normalizedProduct = extensionPayload;
     }
+
+    if (!normalizedProduct.url) {
+      normalizedProduct.url = url;
+    }
+
+    if (!normalizedProduct.productId) {
+      normalizedProduct.productId = productId;
+    }
+
+    if (!normalizedProduct.source) {
+      normalizedProduct.source = source;
+    }
+
+    const priceStats = createInitialPriceStats(
+      normalizedProduct.currentPrice,
+      normalizedProduct.originalPrice
+    );
 
     // Find existing product by URL or productId
     let product = await Product.findOne({
@@ -120,6 +114,7 @@ export async function POST(req) {
       product.discountRate = normalizedProduct.discountRate ?? product.discountRate;
       product.reviewsCount = normalizedProduct.reviewsCount ?? product.reviewsCount;
       product.isOutOfStock = normalizedProduct.isOutOfStock ?? product.isOutOfStock;
+      product.originalPrice = normalizedProduct.originalPrice || product.originalPrice;
       
       await product.save();
     } else {
@@ -128,6 +123,7 @@ export async function POST(req) {
       
       product = await Product.create({
         ...normalizedProduct,
+        ...priceStats,
         userId: session.user.id, // Keep track who added it
       });
     }

@@ -4,7 +4,7 @@
   "version": "1.0.1",
   "description": "Automatically track and sync product prices from Amazon & Flipkart with your PriceWiser dashboard in real-time.",
   "author": "PriceWiser",
-  "homepage_url": "https://pricewiser.com",
+  "homepage_url": "https://price-wiser-coral.vercel.app",
   
   "action": {
     "default_popup": "popup/popup.html",
@@ -31,7 +31,7 @@
         "https://*.amazon.com.au/*",
         "https://*.flipkart.com/*"
       ],
-      "js": ["utils/extractor-content.js", "utils/storage-content.js", "content/contentScript.js"],
+      "js": ["utils/extractor-core.js", "utils/storage-core.js", "content/contentScript.js"],
       "run_at": "document_idle",
       "all_frames": false
     }
@@ -61,7 +61,7 @@
     "https://*.amazon.com.au/*",
     "https://*.flipkart.com/*",
     "http://localhost:3000/*",
-    "https://pricewiser.com/*"
+    "https://price-wiser-coral.vercel.app/*"
   ],
   
   "web_accessible_resources": [

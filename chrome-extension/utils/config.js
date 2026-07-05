@@ -4,8 +4,15 @@
  */
 
 const DEFAULT_BACKEND_BASE_URL = "http://localhost:3000";
+const DEFAULT_APP_BASE_URL = "https://price-wiser-coral.vercel.app";
 const BACKEND_BASE_URL_KEY = "backendBaseUrl";
 const APP_BASE_URL_KEY = "appBaseUrl";
+const BROKEN_APP_HOSTNAMES = new Set([
+  "pricewiser.com",
+  "www.pricewiser.com",
+  "atom.com",
+  "www.atom.com",
+]);
 
 function normalizeBaseUrl(value) {
   if (!value || typeof value !== "string") return "";
@@ -41,6 +48,17 @@ function buildUrl(baseUrl, path = "") {
   ).toString();
 }
 
+function isBrokenAppBaseUrl(value) {
+  try {
+    const origin = normalizeBaseUrl(value);
+    if (!origin) return true;
+    const hostname = new URL(origin).hostname.toLowerCase();
+    return BROKEN_APP_HOSTNAMES.has(hostname);
+  } catch {
+    return true;
+  }
+}
+
 export async function getBackendBaseUrl() {
   const stored = await getStoredBaseUrl(BACKEND_BASE_URL_KEY);
   return stored || DEFAULT_BACKEND_BASE_URL;
@@ -58,18 +76,18 @@ export async function setBackendBaseUrl(value) {
 
 export async function getAppBaseUrl() {
   const stored = await getStoredBaseUrl(APP_BASE_URL_KEY);
-  if (stored) return stored;
+  if (stored && !isBrokenAppBaseUrl(stored)) return stored;
 
   try {
     const manifestUrl = chrome?.runtime?.getManifest?.()?.homepage_url;
-    if (manifestUrl) {
+    if (manifestUrl && !isBrokenAppBaseUrl(manifestUrl)) {
       return normalizeBaseUrl(manifestUrl);
     }
   } catch (error) {
     console.warn("[Config] Unable to read homepage_url:", error.message);
   }
 
-  return "https://pricewiser.com";
+  return DEFAULT_APP_BASE_URL;
 }
 
 export async function setAppBaseUrl(value) {
@@ -95,5 +113,5 @@ export async function getDashboardUrl(returnPath = "") {
 }
 
 export async function getWelcomeUrl() {
-  return getAppUrl("/welcome");
+  return getAppUrl("/");
 }
